@@ -11,6 +11,7 @@ from collections import deque
 from imutils.video import VideoStream
 import numpy as np
 import argparse
+import math
 import cv2
 import imutils
 import time
@@ -38,8 +39,10 @@ else:
 	vs = cv2.VideoCapture(args["video"])
 # allow the camera or video file to warm up
 time.sleep(2.0)
-
-
+count=0
+xprev=0
+yprev=0
+zprev=0
 # keep looping
 while True:
 	# grab the current frame
@@ -77,6 +80,37 @@ while True:
 		((x, y), radius) = cv2.minEnclosingCircle(c)
 
 
+                # JMH2BA TEST ENVprint(x,y,radius)
+
+
+
+		#print(x,y,radius)
+		rad=8
+		correction=1.35
+		rad*=correction
+		theta=78*math.pi/180
+		
+		
+		xa=math.asin(2*(x-300)*math.sin(theta/2)/600)
+		ya=math.asin(2*(y-225)*math.sin(theta/2)/450)
+		phi=math.asin(math.sqrt(math.sin(xa)**2+math.sin(ya)**2))
+
+		r=radius#/math.cos(phi)
+
+		cpc = 2*math.tan(theta/2)
+
+		framewidth=rad*600/r
+
+		z=framewidth/cpc
+		xp=framewidth*(x-300)/600
+		yp=framewidth*(y-225)/450
+		count+=1
+		xprev=xprev*19/20+xp/20
+		yprev=yprev*19/20+yp/20
+		zprev=zprev*19/20+z/20
+		if count%20==1:
+			print("X dist: "+str(round(zprev)), "Y dist: "+str(round(xprev)),"Z dist: "+ str(round(yprev)), "Absolute distance: "+str(round((math.sqrt(xprev**2+yprev**2+zprev**2)))))
+		#
 
         
 		M = cv2.moments(c)
